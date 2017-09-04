@@ -22,11 +22,12 @@ export default class Appointment extends Component {
   }
 
   componentDidMount() {
-    if (this.props.match) {
+    if (this.props.match && sessionStorage.getItem('user')) {
       $.ajax({
         type: "GET",
         url: `http://localhost:3000/appointments/${this.props.match.params.id}`,
-        dataType: "JSON"
+        dataType: "JSON",
+        headers: JSON.parse(sessionStorage.getItem('user')),
       }).done((data) => {
         this.setState({appointment: data})
       })

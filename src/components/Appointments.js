@@ -23,13 +23,16 @@ export default class Appointments extends Component {
   }
 
   componentDidMount() {
-    $.ajax({
-      type: "GET",
-      url: "http://localhost:3000/appointments/",
-      dataType: "JSON"
-    }).done((data) => {
-      this.setState({appointments: data})
-    })
+    if (this.props.match && sessionStorage.getItem('user')) {
+      $.ajax({
+        type: "GET",
+        url: "http://localhost:3000/appointments/",
+        dataType: "JSON",
+        headers: JSON.parse(sessionStorage.getItem('user')),
+      }).done((data) => {
+        this.setState({appointments: data})
+      });
+    }
   }
 
   addNewAppointment = (appointment) => {

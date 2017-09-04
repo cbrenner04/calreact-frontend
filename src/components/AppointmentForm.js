@@ -37,11 +37,12 @@ export default class AppointmentForm extends Component {
   }
 
   componentDidMount() {
-    if (this.props.match) {
+    if (this.props.match && sessionStorage.getItem('user')) {
       $.ajax({
         type: "GET",
         url: `http://localhost:3000/appointments/${this.props.match.params.id}`,
-        dataType: "JSON"
+        dataType: "JSON",
+        headers: JSON.parse(sessionStorage.getItem('user')),
       }).done((data) => {
         this.setState({
           title: { value: data.title, valid: true },
@@ -96,17 +97,20 @@ export default class AppointmentForm extends Component {
       title: this.state.title.value,
       appt_time: this.state.appt_time.value
     }
-    $.post('http://localhost:3000/appointments', { appointment: appointment })
-      .done((data) => {
-        this.props.handleNewAppointment(data);
-        this.resetState();
-      })
-      .fail((response) => {
-        this.setState({
-          formErrors: response.responseJSON,
-          formValid: false
-        });
+    $.ajax({
+      type: 'POST',
+      url: 'http://localhost:3000/appointments',
+      data: { appointment },
+      headers: JSON.parse(sessionStorage.getItem('user')),
+    }).done((data) => {
+      this.props.handleNewAppointment(data);
+      this.resetState();
+    }).fail((response) => {
+      this.setState({
+        formErrors: response.responseJSON,
+        formValid: false
       });
+    });
   }
 
   updateAppointment() {
@@ -117,10 +121,11 @@ export default class AppointmentForm extends Component {
     $.ajax({
       type: "PATCH",
       url: `http://localhost:3000/appointments/${this.props.match.params.id}`,
-      data: { appointment: appointment }
+      data: { appointment: appointment },
+      headers: JSON.parse(sessionStorage.getItem('user')),
     }).done((data) => {
       console.log('appointment updated!');
-      this.resetState();
+      this.props.history.push('/');
     }).fail((response) => {
       this.setState({
         formErrors: response.responseJSON,
@@ -167,7 +172,8 @@ export default class AppointmentForm extends Component {
     if (window.confirm("Are you sure you want to delete this?")) {
       $.ajax({
         type: "DELETE",
-        url: `http://localhost:3000/appointments/${this.props.match.params.id}`
+        url: `http://localhost:3000/appointments/${this.props.match.params.id}`,
+        headers: JSON.parse(sessionStorage.getItem('user')),
       }).done((data) => {
         this.props.history.push('/');
       }).fail((response) => {
